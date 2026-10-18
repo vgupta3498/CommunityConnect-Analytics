@@ -1,0 +1,121 @@
+provider_id,provider_name,service_category,region,capacity_status
+PROV001,North Rental Assistance Partner 001,Rental Assistance,North,Full
+PROV002,North Food Assistance Partner 002,Food Assistance,North,Available
+PROV003,North Utility Assistance Partner 003,Utility Assistance,North,Available
+PROV004,North Healthcare Partner 004,Healthcare,North,Limited
+PROV005,North Transportation Partner 005,Transportation,North,Available
+PROV006,North Employment Support Partner 006,Employment Support,North,Limited
+PROV007,South Rental Assistance Partner 007,Rental Assistance,South,Available
+PROV008,South Food Assistance Partner 008,Food Assistance,South,Available
+PROV009,South Utility Assistance Partner 009,Utility Assistance,South,Available
+PROV010,South Healthcare Partner 010,Healthcare,South,Limited
+PROV011,South Transportation Partner 011,Transportation,South,Full
+PROV012,South Employment Support Partner 012,Employment Support,South,Limited
+PROV013,East Rental Assistance Partner 013,Rental Assistance,East,Limited
+PROV014,East Food Assistance Partner 014,Food Assistance,East,Full
+PROV015,East Utility Assistance Partner 015,Utility Assistance,East,Limited
+PROV016,East Healthcare Partner 016,Healthcare,East,Limited
+PROV017,East Transportation Partner 017,Transportation,East,Available
+PROV018,East Employment Support Partner 018,Employment Support,East,Limited
+PROV019,West Rental Assistance Partner 019,Rental Assistance,West,Available
+PROV020,West Food Assistance Partner 020,Food Assistance,West,Available
+PROV021,West Utility Assistance Partner 021,Utility Assistance,West,Available
+PROV022,West Healthcare Partner 022,Healthcare,West,Full
+PROV023,West Transportation Partner 023,Transportation,West,Available
+PROV024,West Employment Support Partner 024,Employment Support,West,Available
+PROV025,Central Rental Assistance Partner 025,Rental Assistance,Central,Full
+PROV026,Central Food Assistance Partner 026,Food Assistance,Central,Available
+PROV027,Central Utility Assistance Partner 027,Utility Assistance,Central,Available
+PROV028,Central Healthcare Partner 028,Healthcare,Central,Limited
+PROV029,Central Transportation Partner 029,Transportation,Central,Available
+PROV030,Central Employment Support Partner 030,Employment Support,Central,Limited
+PROV031,North Rental Assistance Partner 031,Rental Assistance,North,Full
+PROV032,North Food Assistance Partner 032,Food Assistance,North,Limited
+PROV033,North Utility Assistance Partner 033,Utility Assistance,North,Available
+PROV034,North Healthcare Partner 034,Healthcare,North,Available
+PROV035,North Transportation Partner 035,Transportation,North,Full
+PROV036,North Employment Support Partner 036,Employment Support,North,Limited
+PROV037,South Rental Assistance Partner 037,Rental Assistance,South,Limited
+PROV038,South Food Assistance Partner 038,Food Assistance,South,Available
+PROV039,South Utility Assistance Partner 039,Utility Assistance,South,Available
+PROV040,South Healthcare Partner 040,Healthcare,South,Available
+PROV041,South Transportation Partner 041,Transportation,South,Available
+PROV042,South Employment Support Partner 042,Employment Support,South,Available
+PROV043,East Rental Assistance Partner 043,Rental Assistance,East,Available
+PROV044,East Food Assistance Partner 044,Food Assistance,East,Full
+PROV045,East Utility Assistance Partner 045,Utility Assistance,East,Available
+PROV046,East Healthcare Partner 046,Healthcare,East,Available
+PROV047,East Transportation Partner 047,Transportation,East,Full
+PROV048,East Employment Support Partner 048,Employment Support,East,Available
+PROV049,West Rental Assistance Partner 049,Rental Assistance,West,Limited
+PROV050,West Food Assistance Partner 050,Food Assistance,West,Limited
+PROV051,West Utility Assistance Partner 051,Utility Assistance,West,Full
+PROV052,West Healthcare Partner 052,Healthcare,West,Full
+PROV053,West Transportation Partner 053,Transportation,West,Available
+PROV054,West Employment Support Partner 054,Employment Support,West,Full
+PROV055,Central Rental Assistance Partner 055,Rental Assistance,Central,Limited
+PROV056,Central Food Assistance Partner 056,Food Assistance,Central,Available
+PROV057,Central Utility Assistance Partner 057,Utility Assistance,Central,Available
+PROV058,Central Healthcare Partner 058,Healthcare,Central,Available
+PROV059,Central Transportation Partner 059,Transportation,Central,Available
+PROV060,Central Employment Support Partner 060,Employment Support,Central,Available
+PROV061,North Rental Assistance Partner 061,Rental Assistance,North,Available
+PROV062,North Food Assistance Partner 062,Food Assistance,North,Limited
+PROV063,North Utility Assistance Partner 063,Utility Assistance,North,Available
+PROV064,North Healthcare Partner 064,Healthcare,North,Limited
+PROV065,North Transportation Partner 065,Transportation,North,Available
+PROV066,North Employment Support Partner 066,Employment Support,North,Available
+PROV067,South Rental Assistance Partner 067,Rental Assistance,South,Limited
+PROV068,South Food Assistance Partner 068,Food Assistance,South,Available
+PROV069,South Utility Assistance Partner 069,Utility Assistance,South,Available
+PROV070,South Healthcare Partner 070,Healthcare,South,Limited
+PROV071,South Transportation Partner 071,Transportation,South,Available
+PROV072,South Employment Support Partner 072,Employment Support,South,Limited
+PROV073,East Rental Assistance Partner 073,Rental Assistance,East,Available
+PROV074,East Food Assistance Partner 074,Food Assistance,East,Limited
+PROV075,East Utility Assistance Partner 075,Utility Assistance,East,Limited
+PROV076,East Healthcare Partner 076,Healthcare,East,Limited
+PROV077,East Transportation Partner 077,Transportation,East,Available
+PROV078,East Employment Support Partner 078,Employment Support,East,Full
+PROV079,West Rental Assistance Partner 079,Rental Assistance,West,Full
+PROV080,West Food Assistance Partner 080,Food Assistance,West,Full
+PROV081,West Utility Assistance Partner 081,Utility Assistance,West,Available
+PROV082,West Healthcare Partner 082,Healthcare,West,Limited
+PROV083,West Transportation Partner 083,Transportation,West,Limited
+PROV084,West Employment Support Partner 084,Employment Support,West,Available
+PROV085,Central Rental Assistance Partner 085,Rental Assistance,Central,Available
+PROV086,Central Food Assistance Partner 086,Food Assistance,Central,Available
+PROV087,Central Utility Assistance Partner 087,Utility Assistance,Central,Available
+PROV088,Central Healthcare Partner 088,Healthcare,Central,Available
+PROV089,Central Transportation Partner 089,Transportation,Central,Available
+PROV090,Central Employment Support Partner 090,Employment Support,Central,Available
+PROV091,North Rental Assistance Partner 091,Rental Assistance,North,Available
+PROV092,North Food Assistance Partner 092,Food Assistance,North,Available
+PROV093,North Utility Assistance Partner 093,Utility Assistance,North,Full
+PROV094,North Healthcare Partner 094,Healthcare,North,Available
+PROV095,North Transportation Partner 095,Transportation,North,Full
+PROV096,North Employment Support Partner 096,Employment Support,North,Available
+PROV097,South Rental Assistance Partner 097,Rental Assistance,South,Limited
+PROV098,South Food Assistance Partner 098,Food Assistance,South,Full
+PROV099,South Utility Assistance Partner 099,Utility Assistance,South,Available
+PROV100,South Healthcare Partner 100,Healthcare,South,Available
+PROV101,South Transportation Partner 101,Transportation,South,Available
+PROV102,South Employment Support Partner 102,Employment Support,South,Available
+PROV103,East Rental Assistance Partner 103,Rental Assistance,East,Limited
+PROV104,East Food Assistance Partner 104,Food Assistance,East,Available
+PROV105,East Utility Assistance Partner 105,Utility Assistance,East,Full
+PROV106,East Healthcare Partner 106,Healthcare,East,Limited
+PROV107,East Transportation Partner 107,Transportation,East,Limited
+PROV108,East Employment Support Partner 108,Employment Support,East,Available
+PROV109,West Rental Assistance Partner 109,Rental Assistance,West,Available
+PROV110,West Food Assistance Partner 110,Food Assistance,West,Available
+PROV111,West Utility Assistance Partner 111,Utility Assistance,West,Available
+PROV112,West Healthcare Partner 112,Healthcare,West,Limited
+PROV113,West Transportation Partner 113,Transportation,West,Available
+PROV114,West Employment Support Partner 114,Employment Support,West,Limited
+PROV115,Central Rental Assistance Partner 115,Rental Assistance,Central,Available
+PROV116,Central Food Assistance Partner 116,Food Assistance,Central,Limited
+PROV117,Central Utility Assistance Partner 117,Utility Assistance,Central,Full
+PROV118,Central Healthcare Partner 118,Healthcare,Central,Available
+PROV119,Central Transportation Partner 119,Transportation,Central,Limited
+PROV120,Central Employment Support Partner 120,Employment Support,Central,Limited
