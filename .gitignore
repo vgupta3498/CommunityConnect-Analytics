@@ -1,0 +1,21 @@
+
+# Python environment
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Environment variables
+.env
+
+# Tableau temporary files
+*.twbr
+
+# SQLite local files
+*.db
+*.sqbpro
+*.db-journal
+*.db-wal
+*.db-shm
