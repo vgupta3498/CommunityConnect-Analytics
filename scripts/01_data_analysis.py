@@ -1,239 +1,188 @@
+from pathlib import Path
+from contextlib import closing
 import sqlite3
 import pandas as pd
 
-# Connect to our SQLite database
-conn = sqlite3.connect("database/communityconnect.db")
 
-# Load data into Pandas DataFrames
-requests = pd.read_sql_query("SELECT * FROM service_requests", conn)
-referrals = pd.read_sql_query("SELECT * FROM referrals", conn)
-outcomes = pd.read_sql_query("SELECT * FROM referral_outcomes", conn)
-providers = pd.read_sql_query("SELECT * FROM providers", conn)
-quality_issues = pd.read_sql_query("SELECT * FROM data_quality_issues", conn)
-
-conn.close()
-
-# Verify data loaded successfully
-print("Service Requests:", requests.shape)
-print("Referrals:", referrals.shape)
-print("Referral Outcomes:", outcomes.shape)
-print("Providers:", providers.shape)
-print("Data Quality Issues:", quality_issues.shape)
-
-# Check missing values in all five datasets
-for name, df in {
-    "Service Requests": requests,
-    "Referrals": referrals,
-    "Referral Outcomes": outcomes,
-    "Providers": providers,
-    "Data Quality Issues": quality_issues
-}.items():
-    print(f"\n--- {name} ---")
-    print("Missing values:")
-    print(df.isnull().sum())
-    print("\nData types:")
-    print(df.dtypes)
-
-# Examine documented data-quality problems
-print("\n--- Documented Quality Issues ---")
-print(quality_issues["issue_type"].value_counts())
-
-# Step 3: Investigate missing values by outcome status
-print("\n--- Missing Failure Reasons by Outcome ---")
-print(
-    outcomes.groupby("outcome_status")["failure_reason"]
-    .apply(lambda x: x.isna().sum())
-)
-
-print("\n--- Missing Follow-up Dates by Outcome ---")
-print(
-    outcomes.groupby("outcome_status")["follow_up_date"]
-    .apply(lambda x: x.isna().sum())
-)
-
-# Step 4: Validate referral and request dates
-# Convert date strings into Python datetime values
-# Identify referrals dated before their requests
-
-requests["request_date"] = pd.to_datetime(
-    requests["request_date"], errors="coerce"
-)
-
-referrals["referral_date"] = pd.to_datetime(
-    referrals["referral_date"], errors="coerce"
-)
-
-# Match each referral to its original service request
-date_check = referrals.merge(
-    requests[["request_id", "request_date"]],
-    on="request_id",
-    how="left",
-    validate="many_to_one"
-)
-
-# Identify referrals recorded before the request date
-invalid_dates = date_check[
-    date_check["referral_date"] < date_check["request_date"]
-]
-
-print("\n--- Date Validation ---")
-print("Invalid request dates:", requests["request_date"].isna().sum())
-print("Invalid referral dates:", referrals["referral_date"].isna().sum())
-print("Referrals before requests:", len(invalid_dates))
-
-print("\n--- Sample Date Issues ---")
-print(
-    invalid_dates[
-        ["referral_id", "request_id", "request_date", "referral_date"]
-    ].head()
-)
-
-# Step 5: Combine request, referral, outcome, and provider data
-# Use shared IDs to connect related records
-# Verify that the joins preserve all referral records
-
-combined = referrals.merge(
-    requests,
-    on="request_id",
-    how="left",
-    validate="many_to_one"
-)
-
-combined = combined.merge(
-    outcomes,
-    on="referral_id",
-    how="left",
-    validate="one_to_one"
-)
-
-combined = combined.merge(
-    providers,
-    on="provider_id",
-    how="left",
-    suffixes=("_request", "_provider"),
-    validate="many_to_one"
-)
-
-print("\n--- Combined Dataset ---")
-print("Rows:", combined.shape[0])
-print("Columns:", combined.shape[1])
-print("Column names:", combined.columns.tolist())
-
-# Step 5.1: Validate the combined dataset
-# Check for missing information after joining tables
-# Confirm every referral has related records
-
-print("\n--- Join Validation ---")
-
-print("Missing requests:",
-      combined["request_date"].isna().sum())
-
-print("Missing outcomes:",
-      combined["outcome_status"].isna().sum())
-
-print("Missing providers:",
-      combined["provider_name"].isna().sum())
-
-print("Duplicate referral IDs:",
-      combined["referral_id"].duplicated().sum())
-
-# Step 5.2: Flag data-quality issues
-# Preserve all records in the combined dataset
-# Mark referrals recorded before their request dates
-
-combined["invalid_date_flag"] = (
-    combined["referral_date"] < combined["request_date"]
-)
-
-combined["missing_urgency_flag"] = (
-    combined["urgency_level"].isna()
-)
-
-print("\n--- Data Quality Flags ---")
-print("Invalid referral dates:", combined["invalid_date_flag"].sum())
-print("Missing urgency:", combined["missing_urgency_flag"].sum())
-print("Total referrals:", len(combined))
-
-# Step 5.3: Prepare referral-level data for Tableau
-# Label missing urgency without inventing a value
-# Export all referrals with their data-quality flags
-
-combined["urgency_level"] = combined["urgency_level"].fillna("Unknown")
-
-combined.to_csv(
-    "data/processed/referral_analysis.csv",
-    index=False
-)
-
-print("\n--- Export Complete ---")
-print("File: data/processed/referral_analysis.csv")
-print("Rows exported:", len(combined))
-print("Missing urgency labels:",
-      (combined["urgency_level"] == "Unknown").sum())
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATABASE_PATH = PROJECT_ROOT / "database" / "communityconnect.db"
+OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
+SUCCESS_OUTCOME = "Needs Met"
+UNKNOWN_URGENCY = "Unknown"
 
 
-# Step 6: Summarize referrals at the request level
-# Mark a request resolved if any referral has Needs Met
-# Keep one row per original service request
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
 
-request_summary = combined.groupby("request_id").agg(
-    referral_count=("referral_id", "count"),
-    has_success=("outcome_status", lambda x: (x == "Needs Met").any())
-).reset_index()
 
-request_analysis = requests.merge(
-    request_summary,
-    on="request_id",
-    how="left",
-    validate="one_to_one"
-)
+def main():
+    require(DATABASE_PATH.is_file(), f"Database not found: {DATABASE_PATH}")
 
-print("\n--- Request-Level Dataset ---")
-print("Total requests:", len(request_analysis))
-print("Requests with recorded success:", request_analysis["has_success"].sum())
-print("Requests without recorded success:", (~request_analysis["has_success"]).sum())
+    with closing(sqlite3.connect(DATABASE_PATH)) as conn:
+        requests = pd.read_sql_query("SELECT * FROM service_requests", conn)
+        referrals = pd.read_sql_query("SELECT * FROM referrals", conn)
+        outcomes = pd.read_sql_query("SELECT * FROM referral_outcomes", conn)
+        providers = pd.read_sql_query("SELECT * FROM providers", conn)
 
-# Step 6.1: Prepare request-level data for Tableau
-# Label missing urgency and recorded resolution status
-# Export one row per service request
+    sources = {
+        "Service Requests": requests,
+        "Referrals": referrals,
+        "Referral Outcomes": outcomes,
+        "Providers": providers,
+    }
 
-request_analysis["urgency_level"] = (
-    request_analysis["urgency_level"].fillna("Unknown")
-)
+    print("\n--- Source Data Profiling ---")
+    for name, frame in sources.items():
+        print(f"\n{name}: {len(frame):,} rows, {len(frame.columns)} columns")
+        print("Missing values:\n", frame.isna().sum().to_string())
+        print("Data types:\n", frame.dtypes.to_string())
 
-request_analysis["resolution_status"] = (
-    request_analysis["has_success"].map({
-        True: "Needs Met",
-        False: "No Recorded Success"
+    print("\n--- Missing Fields by Referral Outcome ---")
+    for col in ["failure_reason", "follow_up_date"]:
+        print(f"\nMissing {col}:")
+        print(outcomes.groupby("outcome_status", dropna=False)[col]
+              .apply(lambda series: series.isna().sum()).to_string())
+
+
+
+
+    # Validate identifier uniqueness before any joins.
+    for frame, key, name in [
+        (requests, "request_id", "service_requests"),
+        (referrals, "referral_id", "referrals"),
+        (outcomes, "referral_id", "referral_outcomes"),
+        (providers, "provider_id", "providers"),
+    ]:
+        require(frame[key].notna().all(), f"Missing {key} in {name}")
+        require(frame[key].is_unique, f"Duplicate {key} in {name}")
+
+
+
+
+    # Parse the dates and report issues rather than manufacturing fixes.
+    requests["request_date"] = pd.to_datetime(requests["request_date"], errors="coerce")
+    referrals["referral_date"] = pd.to_datetime(referrals["referral_date"], errors="coerce")
+
+
+
+
+    combined = referrals.merge(
+        requests, on="request_id", how="left", validate="many_to_one", indicator="_request_join"
+    )
+    missing_requests = (combined["_request_join"] != "both").sum()
+    combined = combined.drop(columns="_request_join")
+
+    combined = combined.merge(
+        outcomes, on="referral_id", how="left", validate="one_to_one", indicator="_outcome_join"
+    )
+    missing_outcomes = (combined["_outcome_join"] != "both").sum()
+    combined = combined.drop(columns="_outcome_join")
+
+    combined = combined.merge(
+        providers, on="provider_id", how="left",
+        suffixes=("_request", "_provider"), validate="many_to_one", indicator="_provider_join"
+    )
+    missing_providers = (combined["_provider_join"] != "both").sum()
+    combined = combined.drop(columns="_provider_join")
+
+    print("\n--- Join Validation ---")
+    print("Missing linked requests:", missing_requests)
+    print("Missing linked outcomes:", missing_outcomes)
+    print("Missing linked providers:", missing_providers)
+    print("Duplicate referral IDs:", combined["referral_id"].duplicated().sum())
+    require(not (missing_requests or missing_outcomes or missing_providers),
+            "At least one referral is missing its related request, outcome, or provider")
+    require(len(combined) == len(referrals), "Joins changed the referral row count")
+    require(combined["referral_id"].is_unique, "Joins duplicated referrals")
+
+    # Flags must be calculated BEFORE missing urgency is labeled as Unknown.
+    combined["invalid_date_flag"] = (
+        combined["referral_date"] < combined["request_date"]
+    )
+    combined["missing_urgency_flag"] = combined["urgency_level"].isna()
+
+    print("\n--- Independently Detected Data Quality Issues ---")
+    print("Invalid request dates:", requests["request_date"].isna().sum())
+    print("Invalid referral dates:", referrals["referral_date"].isna().sum())
+    print("Referrals dated before requests:", combined["invalid_date_flag"].sum())
+    print("Requests missing urgency:", requests["urgency_level"].isna().sum())
+    print("Referrals linked to missing-urgency requests:",
+          combined["missing_urgency_flag"].sum())
+    print("Sample date issues:")
+    print(combined.loc[combined["invalid_date_flag"],
+                       ["referral_id", "request_id", "request_date", "referral_date"]].head())
+
+    # Prepare a single row per request; retain requests with no referrals.
+    request_summary = combined.groupby("request_id").agg(
+        referral_count=("referral_id", "count"),
+        has_success=("outcome_status", lambda values: values.eq(SUCCESS_OUTCOME).any()),
+    ).reset_index()
+
+    request_analysis = requests.merge(
+        request_summary, on="request_id", how="left", validate="one_to_one"
+    )
+    request_analysis["referral_count"] = (
+        request_analysis["referral_count"].fillna(0).astype(int)
+    )
+    request_analysis["has_success"] = (
+        request_analysis["has_success"].fillna(False).astype(bool)
+    )
+    request_analysis["resolution_status"] = request_analysis["has_success"].map({
+        True: SUCCESS_OUTCOME,
+        False: "No Recorded Success",
     })
-)
 
-request_analysis.to_csv(
-    "data/processed/request_analysis.csv",
-    index=False
-)
+    combined["urgency_level"] = combined["urgency_level"].fillna(UNKNOWN_URGENCY)
+    request_analysis["urgency_level"] = (
+        request_analysis["urgency_level"].fillna(UNKNOWN_URGENCY)
+    )
 
-print("\n--- Request Export Complete ---")
-print("File: data/processed/request_analysis.csv")
-print("Rows exported:", len(request_analysis))
-print("\nResolution breakdown:")
-print(request_analysis["resolution_status"].value_counts())
+    # Invariants compare generated data with the actual source data, not
+    # with numbers copied from the current dashboard.
+    require(len(request_analysis) == len(requests), "Request row count changed")
+    require(request_analysis["request_id"].is_unique, "Request IDs are not unique")
+    require(request_analysis["referral_count"].sum() == len(referrals),
+            "Request referral counts do not reconcile to source referrals")
+    require(request_analysis["has_success"].sum() ==
+            combined.loc[combined["outcome_status"] == SUCCESS_OUTCOME, "request_id"].nunique(),
+            "Recorded successful request count does not reconcile")
+    require(len(request_analysis) ==
+            (request_analysis["has_success"].sum() + (~request_analysis["has_success"]).sum()),
+            "Request success categories do not partition all requests")
+    require(
+    combined.loc[
+        combined["missing_urgency_flag"], "urgency_level"
+    ].eq(UNKNOWN_URGENCY).all(),
+    "Some missing urgency values were not labeled correctly"
+    )
+
+    # Match the Tableau input schemas. Keep output file names unchanged.
+    for col in ["request_date", "referral_date"]:
+        combined[col] = combined[col].dt.strftime("%Y-%m-%d")
+    request_analysis["request_date"] = (
+        request_analysis["request_date"].dt.strftime("%Y-%m-%d")
+    )
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    referral_output = OUTPUT_DIR / "referral_analysis.csv"
+    request_output = OUTPUT_DIR / "request_analysis.csv"
+    combined.to_csv(referral_output, index=False)
+    request_analysis.to_csv(request_output, index=False)
+
+    success_count = int(request_analysis["has_success"].sum())
+    request_count = len(request_analysis)
+    print("\n--- Final Validation ---")
+    print(f"Total requests: {request_count:,}")
+    print(f"Requests with recorded success: {success_count:,}")
+    print(f"Requests without recorded success: {request_count - success_count:,}")
+    print(f"Recorded request resolution rate: {success_count / request_count:.2%}" if request_count
+          else "Recorded request resolution rate: n/a (no requests)")
+    print(f"Total referrals: {len(combined):,}")
+    print(f"Saved: {request_output}")
+    print(f"Saved: {referral_output}")
+    print("All validation checks passed!")
 
 
-# Step 7: Validate final analysis datasets
-# Check row counts, unique IDs, and key metrics
-# Stop execution if any validation fails
-
-assert len(combined) == 12500, "Referral count mismatch"
-assert combined["referral_id"].is_unique, "Duplicate referral IDs"
-
-assert len(request_analysis) == 10000, "Request count mismatch"
-assert request_analysis["request_id"].is_unique, "Duplicate request IDs"
-
-assert request_analysis["has_success"].sum() == 6386, "Success count mismatch"
-
-assert combined["invalid_date_flag"].sum() == 35, "Date issue count mismatch"
-assert combined["missing_urgency_flag"].sum() == 70, "Urgency issue count mismatch"
-
-print("\n--- Final Validation ---")
-print("All validation checks passed!")
+if __name__ == "__main__":
+    main()
