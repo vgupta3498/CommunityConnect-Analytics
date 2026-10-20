@@ -2,7 +2,6 @@
 -- Purpose: Calculate request-level resolution rates, unresolved requests, and average referrals per request across all service categories.
 -- A request counts as successful if at least one associated referral has the outcome 'Needs Met'.
 
-
 WITH request_summary AS (
     SELECT
         sr.request_id,
@@ -36,7 +35,6 @@ WITH request_summary AS (
         sr.region,
         sr.urgency_level
 )
-
 SELECT
     service_category,
 

@@ -1,9 +1,7 @@
-
 from pathlib import Path
 from contextlib import closing
 import sqlite3
 import pandas as pd
-
 
 # Project paths and outcome definitions
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -11,7 +9,6 @@ DATABASE_PATH = PROJECT_ROOT / "database" / "communityconnect.db"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
 SUCCESS_OUTCOME = "Needs Met"
 UNKNOWN_URGENCY = "Unknown"
-
 
 # Stop execution if an important data validation fails
 def require(condition, message):

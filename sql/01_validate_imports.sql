@@ -1,4 +1,3 @@
-
 -- Project: CommunityConnect Analytics
 -- Purpose: Validate the number of records imported into each database table.
 
@@ -22,7 +21,3 @@ UNION ALL
 SELECT 'Referral Outcomes', COUNT(*)
 FROM referral_outcomes
 
-UNION ALL
-
-SELECT 'Data Quality Issues', COUNT(*)
-FROM data_quality_issues;
